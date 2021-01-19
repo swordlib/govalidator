@@ -59,7 +59,7 @@ func TestStructFirst(t *testing.T) {
 		{
 			TestName: "RequiredStringField",
 			Data: &testPerson{
-				FirstName: "alice",
+				FirstName: "Alice",
 				LastName:  "Smith",
 				Country:   "America",
 				Age:       18,
@@ -75,7 +75,7 @@ func TestStructFirst(t *testing.T) {
 		{
 			TestName: "EmptyRequiredIntField",
 			Data: &testPerson{
-				FirstName: "alice",
+				FirstName: "Alice",
 			},
 			RulesMap: RulesMap{
 				"Age": {
@@ -89,7 +89,7 @@ func TestStructFirst(t *testing.T) {
 		{
 			TestName: "RequiredIntField",
 			Data: &testPerson{
-				FirstName: "alice",
+				FirstName: "Alice",
 				Age:       18,
 			},
 			RulesMap: RulesMap{
@@ -101,6 +101,46 @@ func TestStructFirst(t *testing.T) {
 			},
 			expected: nil,
 		},
+		{
+			TestName: "CustomErrorMessage",
+			Data: &testPerson{
+				FirstName: "",
+			},
+			RulesMap: RulesMap{
+				"FirstName": {
+					{
+						Required: true,
+						Message:  "Please input your firstname",
+					},
+				},
+			},
+			expected: errors.New("Please input your firstname"),
+		},
+		{
+			TestName: "CustomValidator",
+			Data: &testPerson{
+				FirstName: "Alice",
+				Age:       16,
+			},
+			RulesMap: RulesMap{
+				"FirstName": {
+					{
+						Required: true,
+					},
+				},
+				"Age": {
+					{
+						Validator: func(rule *Rule, value interface{}) error {
+							if age := value.(int); age < 18 {
+								return errors.New("The age of person must be greater than 18 years old")
+							}
+							return nil
+						},
+					},
+				},
+			},
+			expected: errors.New("The age of person must be greater than 18 years old"),
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.TestName, func(t *testing.T) {
@@ -108,12 +148,12 @@ func TestStructFirst(t *testing.T) {
 			err := gv.StructFisrt(c.Data)
 			if c.expected == nil || err == nil {
 				if c.expected == nil && err != nil {
-					t.Errorf("expected nil, but got %q", err)
+					t.Errorf("Expected nil, but got %q", err)
 				} else if c.expected != nil && err == nil {
-					t.Errorf("expected %q, but got nil", c.expected)
+					t.Errorf("Expected %q, but got nil", c.expected)
 				}
 			} else if c.expected.Error() != err.Error() {
-				t.Errorf("expected %q, but got %q", c.expected, err)
+				t.Errorf("Expected %q, but got %q", c.expected, err)
 			}
 		})
 	}

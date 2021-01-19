@@ -1,21 +1,36 @@
 package govalidator
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 )
 
 type Rule struct {
 	Required  bool
-	Validator *ValidateFunc
+	Validator ValidateFunc
 	Message   string
 }
 
-func (r *Rule) validate(value reflect.Value, name string) error {
+func (r *Rule) validate(value reflect.Value, name string) (err error) {
+	// custom error message
+	defer (func() {
+		if err != nil && r.Message != "" {
+			err = errors.New(r.Message)
+		}
+	})()
+
 	if r.Required && value.IsZero() {
-		return fmt.Errorf("%s is required", name)
+		err = fmt.Errorf("%s is required", name)
+		return
 	}
-	return nil
+
+	if r.Validator != nil {
+		if err = r.Validator(r, value.Interface()); err != nil {
+			return
+		}
+	}
+	return
 }
 
 type Rules []*Rule
@@ -50,7 +65,7 @@ func (v *Validator) StructFisrt(value interface{}) error {
 	return nil
 }
 
-type ValidateFunc func(rule, value interface{}) error
+type ValidateFunc func(rule *Rule, value interface{}) error
 
 func New(rules RulesMap, varoptions ...*ValidatorOptions) *Validator {
 	var v *Validator
