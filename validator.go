@@ -31,8 +31,8 @@ func (rs Rules) validate(value reflect.Value, name string) error {
 
 type RulesMap map[string]Rules
 
+// ValidatorOptions It's not used until now, just reserves for future
 type ValidatorOptions struct {
-	First bool
 }
 type Validator struct {
 	options *ValidatorOptions
@@ -40,7 +40,7 @@ type Validator struct {
 }
 
 func (v *Validator) StructFisrt(value interface{}) error {
-	rv := reflect.ValueOf(value).Elem()
+	rv := reflect.Indirect(reflect.ValueOf(value))
 	for fieldName, fieldRules := range v.rules {
 		fv := rv.FieldByName(fieldName)
 		if err := fieldRules.validate(fv, fieldName); err != nil {
@@ -60,9 +60,7 @@ func New(rules RulesMap, varoptions ...*ValidatorOptions) *Validator {
 		}
 	}
 	v = &Validator{
-		options: &ValidatorOptions{
-			First: true,
-		},
+		options: &ValidatorOptions{},
 	}
 	v.rules = rules
 	return v

@@ -9,6 +9,16 @@ type testPerson struct {
 	FirstName string
 	LastName  string
 	Country   string
+	Age       int
+}
+
+func TestNew(t *testing.T) {
+	t.Run("NewWithoutOptions", func(t *testing.T) {
+		New(RulesMap{})
+	})
+	t.Run("NewWithOptions", func(t *testing.T) {
+		New(RulesMap{}, &ValidatorOptions{})
+	})
 }
 
 func TestStructFirst(t *testing.T) {
@@ -21,9 +31,21 @@ func TestStructFirst(t *testing.T) {
 	}
 	cases := []*structTestCase{
 		{
-			TestName: "EmptyRequiredFieldShouldError",
+			TestName: "Struct Value",
+			Data:     testPerson{},
+			RulesMap: RulesMap{},
+			expected: nil,
+		},
+		{
+			TestName: "Struct Pointer",
+			Data:     &testPerson{},
+			RulesMap: RulesMap{},
+			expected: nil,
+		},
+		{
+			TestName: "EmptyRequiredStringField",
 			Data: &testPerson{
-				"", "Smith", "America",
+				FirstName: "",
 			},
 			RulesMap: RulesMap{
 				"FirstName": {
@@ -35,12 +57,43 @@ func TestStructFirst(t *testing.T) {
 			expected: errors.New("FirstName is required"),
 		},
 		{
-			TestName: "NotEmptyRequiredFieldShouldPass",
+			TestName: "RequiredStringField",
 			Data: &testPerson{
-				"alice", "Smith", "America",
+				FirstName: "alice",
+				LastName:  "Smith",
+				Country:   "America",
+				Age:       18,
 			},
 			RulesMap: RulesMap{
 				"FirstName": {
+					{
+						Required: true,
+					},
+				},
+			},
+		},
+		{
+			TestName: "EmptyRequiredIntField",
+			Data: &testPerson{
+				FirstName: "alice",
+			},
+			RulesMap: RulesMap{
+				"Age": {
+					{
+						Required: true,
+					},
+				},
+			},
+			expected: errors.New("Age is required"),
+		},
+		{
+			TestName: "RequiredIntField",
+			Data: &testPerson{
+				FirstName: "alice",
+				Age:       18,
+			},
+			RulesMap: RulesMap{
+				"Age": {
 					{
 						Required: true,
 					},
