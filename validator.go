@@ -56,11 +56,18 @@ type Validator struct {
 	rules   RulesMap
 }
 
-// StructFirst Validate a struct and stop when it encounter the first error
+// StructFirst Validate a struct and stop when it encounter the first error.
+// It will panic when call with other than struct or validate a not present struct field
 func (v *Validator) StructFirst(value interface{}) error {
 	rv := reflect.Indirect(reflect.ValueOf(value))
+	if rv.Kind() != reflect.Struct {
+		panic("value must be a struct")
+	}
 	for fieldName, fieldRules := range v.rules {
 		fv := rv.FieldByName(fieldName)
+		if !fv.IsValid() {
+			panic(fmt.Sprintf("Struct field: %q is not present", fieldName))
+		}
 		if err := fieldRules.validate(fv, fieldName); err != nil {
 			return err
 		}

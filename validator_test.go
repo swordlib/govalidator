@@ -167,13 +167,51 @@ func TestStructFirst(t *testing.T) {
 			err := gv.StructFirst(c.Data)
 			if c.want == nil || err == nil {
 				if c.want == nil && err != nil {
-					t.Errorf("want nil, but got %q", err)
+					t.Errorf("want: nil, but got: %q", err)
 				} else if c.want != nil && err == nil {
-					t.Errorf("want %q, but got nil", c.want)
+					t.Errorf("want: %q, but got: nil", c.want)
 				}
 			} else if c.want.Error() != err.Error() {
-				t.Errorf("want %q, but got %q", c.want, err)
+				t.Errorf("want: %q, but got: %q", c.want, err)
 			}
 		})
 	}
+}
+
+func TestStructWithOtherThing(t *testing.T) {
+	defer (func() {
+		if err := recover(); err != nil {
+			want := "value must be a struct"
+			if err.(string) != want {
+				t.Errorf("want: %q, but got %q", want, err)
+			}
+		} else {
+			t.Error("Call StructFirst with other than struct should panic")
+		}
+	})()
+	gv := New(RulesMap{})
+	gv.StructFirst(8)
+	gv.StructFirst("testing")
+	gv.StructFirst(9.0)
+	gv.StructFirst([]int{8, 8, 8})
+}
+
+func TestValidatingNotPresentStructField(t *testing.T) {
+	defer (func() {
+		if err := recover(); err != nil {
+			want := `Struct field: "NotPresent" is not present`
+			if err.(string) != want {
+				t.Errorf("want: %q, but got %q", want, err)
+			}
+		} else {
+			t.Error("Validating not present struct field should panic")
+		}
+	})()
+	New(RulesMap{
+		"NotPresent": {
+			{
+				Required: true,
+			},
+		},
+	}).StructFirst(&testPerson{})
 }
