@@ -1,8 +1,10 @@
-package govalidator
+package govalidator_test
 
 import (
 	"errors"
 	"testing"
+
+	. "github.com/swordlib/govalidator"
 )
 
 type testPerson struct {
@@ -26,21 +28,20 @@ func TestStructFirst(t *testing.T) {
 		TestName string
 		Data     interface{}
 		RulesMap RulesMap
-		HasError bool
-		expected error
+		want     error
 	}
 	cases := []*structTestCase{
 		{
 			TestName: "Struct Value",
 			Data:     testPerson{},
 			RulesMap: RulesMap{},
-			expected: nil,
+			want:     nil,
 		},
 		{
 			TestName: "Struct Pointer",
 			Data:     &testPerson{},
 			RulesMap: RulesMap{},
-			expected: nil,
+			want:     nil,
 		},
 		{
 			TestName: "EmptyRequiredStringField",
@@ -54,7 +55,7 @@ func TestStructFirst(t *testing.T) {
 					},
 				},
 			},
-			expected: errors.New("FirstName is required"),
+			want: errors.New("FirstName is required"),
 		},
 		{
 			TestName: "RequiredStringField",
@@ -84,7 +85,7 @@ func TestStructFirst(t *testing.T) {
 					},
 				},
 			},
-			expected: errors.New("Age is required"),
+			want: errors.New("Age is required"),
 		},
 		{
 			TestName: "RequiredIntField",
@@ -99,7 +100,7 @@ func TestStructFirst(t *testing.T) {
 					},
 				},
 			},
-			expected: nil,
+			want: nil,
 		},
 		{
 			TestName: "CustomErrorMessage",
@@ -114,7 +115,7 @@ func TestStructFirst(t *testing.T) {
 					},
 				},
 			},
-			expected: errors.New("Please input your firstname"),
+			want: errors.New("Please input your firstname"),
 		},
 		{
 			TestName: "CustomValidator",
@@ -139,21 +140,39 @@ func TestStructFirst(t *testing.T) {
 					},
 				},
 			},
-			expected: errors.New("The age of person must be greater than 18 years old"),
+			want: errors.New("The age of person must be greater than 18 years old"),
+		},
+		{
+			TestName: "MessageShouldNotOverrideCustomValidatorError",
+			Data: &testPerson{
+				FirstName: "Alice",
+			},
+			RulesMap: RulesMap{
+				"FirstName": {
+					{
+						Required: true,
+						Message:  "Please input your firstname",
+						Validator: func(rule *Rule, value interface{}) error {
+							return errors.New("The name Alice has been occupied")
+						},
+					},
+				},
+			},
+			want: errors.New("The name Alice has been occupied"),
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.TestName, func(t *testing.T) {
 			gv := New(c.RulesMap)
-			err := gv.StructFisrt(c.Data)
-			if c.expected == nil || err == nil {
-				if c.expected == nil && err != nil {
-					t.Errorf("Expected nil, but got %q", err)
-				} else if c.expected != nil && err == nil {
-					t.Errorf("Expected %q, but got nil", c.expected)
+			err := gv.StructFirst(c.Data)
+			if c.want == nil || err == nil {
+				if c.want == nil && err != nil {
+					t.Errorf("want nil, but got %q", err)
+				} else if c.want != nil && err == nil {
+					t.Errorf("want %q, but got nil", c.want)
 				}
-			} else if c.expected.Error() != err.Error() {
-				t.Errorf("Expected %q, but got %q", c.expected, err)
+			} else if c.want.Error() != err.Error() {
+				t.Errorf("want %q, but got %q", c.want, err)
 			}
 		})
 	}

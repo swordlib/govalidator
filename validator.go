@@ -15,7 +15,7 @@ type Rule struct {
 func (r *Rule) validate(value reflect.Value, name string) (err error) {
 	// custom error message
 	defer (func() {
-		if err != nil && r.Message != "" {
+		if err != nil && r.Validator == nil && r.Message != "" {
 			err = errors.New(r.Message)
 		}
 	})()
@@ -54,7 +54,8 @@ type Validator struct {
 	rules   RulesMap
 }
 
-func (v *Validator) StructFisrt(value interface{}) error {
+// StructFirst Validate a struct and stop when it encounter the first error
+func (v *Validator) StructFirst(value interface{}) error {
 	rv := reflect.Indirect(reflect.ValueOf(value))
 	for fieldName, fieldRules := range v.rules {
 		fv := rv.FieldByName(fieldName)
@@ -67,6 +68,7 @@ func (v *Validator) StructFisrt(value interface{}) error {
 
 type ValidateFunc func(rule *Rule, value interface{}) error
 
+// New create a new validator
 func New(rules RulesMap, varoptions ...*ValidatorOptions) *Validator {
 	var v *Validator
 	if len(varoptions) > 0 && varoptions[0] != nil {
