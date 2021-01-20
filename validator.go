@@ -49,6 +49,8 @@ type RulesMap map[string]Rules
 // ValidatorOptions It's not used until now, just reserves for future
 type ValidatorOptions struct {
 }
+
+// Validator is a validation program for go
 type Validator struct {
 	options *ValidatorOptions
 	rules   RulesMap
@@ -66,6 +68,7 @@ func (v *Validator) StructFirst(value interface{}) error {
 	return nil
 }
 
+// ValidateFunc is a custom validator type, alias of func(rule *Rule, value interface{}) error
 type ValidateFunc func(rule *Rule, value interface{}) error
 
 // New create a new validator
