@@ -1,7 +1,7 @@
 # govalidator
 Go Validator
 
-It's unstable now. I will realse v1.0.0, when it finish
+It's unstable now. I will release v1.0.0, when it finish
 
 ## document
 
