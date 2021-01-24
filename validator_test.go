@@ -131,7 +131,7 @@ func TestStructFirst(t *testing.T) {
 				},
 				"Age": {
 					{
-						Validator: func(rule *Rule, value interface{}) error {
+						Validator: func(rule *Rule, value interface{}, target interface{}) error {
 							if age := value.(int); age < 18 {
 								return errors.New("The age of person must be greater than 18 years old")
 							}
@@ -152,7 +152,7 @@ func TestStructFirst(t *testing.T) {
 					{
 						Required: true,
 						Message:  "Please input your firstname",
-						Validator: func(rule *Rule, value interface{}) error {
+						Validator: func(rule *Rule, value interface{}, target interface{}) error {
 							return errors.New("The name Alice has been occupied")
 						},
 					},

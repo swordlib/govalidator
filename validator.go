@@ -12,7 +12,7 @@ type Rule struct {
 	Message   string
 }
 
-func (r *Rule) validate(value reflect.Value, name string) (err error) {
+func (r *Rule) validate(value reflect.Value, name string, target interface{}) (err error) {
 	// custom error message
 	defer (func() {
 		if err != nil && r.Validator == nil && r.Message != "" {
@@ -26,7 +26,7 @@ func (r *Rule) validate(value reflect.Value, name string) (err error) {
 	}
 
 	if r.Validator != nil {
-		if err = r.Validator(r, value.Interface()); err != nil {
+		if err = r.Validator(r, value.Interface(), target); err != nil {
 			return
 		}
 	}
@@ -35,9 +35,9 @@ func (r *Rule) validate(value reflect.Value, name string) (err error) {
 
 type Rules []*Rule
 
-func (rs Rules) validate(value reflect.Value, name string) error {
+func (rs Rules) validate(value reflect.Value, name string, target interface{}) error {
 	for _, rule := range rs {
-		if err := rule.validate(value, name); err != nil {
+		if err := rule.validate(value, name, target); err != nil {
 			return err
 		}
 	}
@@ -58,8 +58,8 @@ type Validator struct {
 
 // StructFirst Validate a struct and stop when it encounter the first error.
 // It will panic when call with other than struct or validate a not present struct field
-func (v *Validator) StructFirst(value interface{}) error {
-	rv := reflect.Indirect(reflect.ValueOf(value))
+func (v *Validator) StructFirst(target interface{}) error {
+	rv := reflect.Indirect(reflect.ValueOf(target))
 	if rv.Kind() != reflect.Struct {
 		panic("value must be a struct")
 	}
@@ -68,15 +68,15 @@ func (v *Validator) StructFirst(value interface{}) error {
 		if !fv.IsValid() {
 			panic(fmt.Sprintf("Struct field: %q is not present", fieldName))
 		}
-		if err := fieldRules.validate(fv, fieldName); err != nil {
+		if err := fieldRules.validate(fv, fieldName, target); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// ValidateFunc is a custom validator type, alias of func(rule *Rule, value interface{}) error
-type ValidateFunc func(rule *Rule, value interface{}) error
+// ValidateFunc is a custom validator type, alias of func(rule *Rule, value interface{}, target interface{}) error
+type ValidateFunc func(rule *Rule, value interface{}, target interface{}) error
 
 // New create a new validator
 func New(rules RulesMap, varoptions ...*ValidatorOptions) *Validator {

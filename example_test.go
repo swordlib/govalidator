@@ -18,7 +18,7 @@ func Example() {
 				Required: true,
 			},
 			{
-				Validator: func(rule *govalidator.Rule, value interface{}) error {
+				Validator: func(rule *govalidator.Rule, value interface{}, target interface{}) error {
 
 					if v := value.(string); v != "Alice" {
 						return errors.New("FirstName must be Alice")
