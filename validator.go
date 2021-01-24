@@ -12,7 +12,7 @@ type Rule struct {
 	Message   string
 }
 
-func (r *Rule) validate(value reflect.Value, name string, target interface{}) (err error) {
+func (r *Rule) validate(fieldName string, target interface{}) (err error) {
 	// custom error message
 	defer (func() {
 		if err != nil && r.Validator == nil && r.Message != "" {
@@ -20,8 +20,15 @@ func (r *Rule) validate(value reflect.Value, name string, target interface{}) (e
 		}
 	})()
 
+	rv := reflect.Indirect(reflect.ValueOf(target))
+	value := rv.FieldByName(fieldName)
+
+	if !value.IsValid() {
+		panic(fmt.Sprintf("Struct field: %q is not present", fieldName))
+	}
+
 	if r.Required && value.IsZero() {
-		err = fmt.Errorf("%s is required", name)
+		err = fmt.Errorf("%s is required", fieldName)
 		return
 	}
 
@@ -35,9 +42,9 @@ func (r *Rule) validate(value reflect.Value, name string, target interface{}) (e
 
 type Rules []*Rule
 
-func (rs Rules) validate(value reflect.Value, name string, target interface{}) error {
+func (rs Rules) validate(name string, target interface{}) error {
 	for _, rule := range rs {
-		if err := rule.validate(value, name, target); err != nil {
+		if err := rule.validate(name, target); err != nil {
 			return err
 		}
 	}
@@ -64,11 +71,7 @@ func (v *Validator) StructFirst(target interface{}) error {
 		panic("value must be a struct")
 	}
 	for fieldName, fieldRules := range v.rules {
-		fv := rv.FieldByName(fieldName)
-		if !fv.IsValid() {
-			panic(fmt.Sprintf("Struct field: %q is not present", fieldName))
-		}
-		if err := fieldRules.validate(fv, fieldName, target); err != nil {
+		if err := fieldRules.validate(fieldName, target); err != nil {
 			return err
 		}
 	}
