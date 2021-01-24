@@ -61,9 +61,6 @@ func TestStructFirst(t *testing.T) {
 			TestName: "RequiredStringField",
 			Data: &testPerson{
 				FirstName: "Alice",
-				LastName:  "Smith",
-				Country:   "America",
-				Age:       18,
 			},
 			RulesMap: RulesMap{
 				"FirstName": {
@@ -72,6 +69,7 @@ func TestStructFirst(t *testing.T) {
 					},
 				},
 			},
+			want: nil,
 		},
 		{
 			TestName: "EmptyRequiredIntField",

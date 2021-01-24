@@ -8,7 +8,7 @@ import (
 
 type Rule struct {
 	Required  bool
-	Validator ValidateFunc
+	Validator ValidatorFunc
 	Message   string
 }
 
@@ -78,8 +78,8 @@ func (v *Validator) StructFirst(target interface{}) error {
 	return nil
 }
 
-// ValidateFunc is a custom validator type, alias of func(rule *Rule, value interface{}, target interface{}) error
-type ValidateFunc func(rule *Rule, value interface{}, target interface{}) error
+// ValidatorFunc is a custom validator type, alias of func(rule *Rule, value interface{}, target interface{}) error
+type ValidatorFunc func(rule *Rule, value interface{}, target interface{}) error
 
 // New create a new validator
 func New(rules RulesMap, varoptions ...*ValidatorOptions) *Validator {
