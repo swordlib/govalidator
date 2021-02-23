@@ -9,17 +9,13 @@ import (
 )
 
 // EqualToField return a ValidatorFunc that validates if fields are equal
-func EqualToField(fieldName string, message ...string) govalidator.ValidatorFunc {
-	msg := ""
-	if len(message) > 0 {
-		msg = message[0]
-	}
+func EqualToField(fieldName string) govalidator.ValidatorFunc {
 	return func(rule *govalidator.Rule, value interface{}, target interface{}) error {
 		t := reflect.Indirect(reflect.ValueOf(target))
 		otherField := t.FieldByName(fieldName)
 		if !reflect.DeepEqual(value, otherField.Interface()) {
-			if msg != "" {
-				return errors.New(msg)
+			if rule != nil && rule.Message != "" {
+				return errors.New(rule.Message)
 			}
 			return fmt.Errorf("EqualToField validation error: %q", fieldName)
 		}
