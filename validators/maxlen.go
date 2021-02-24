@@ -8,8 +8,8 @@ import (
 	"github.com/swordlib/govalidator"
 )
 
-// MaxLen return an ValidatorFunc that limit max length of value
-// It panics if value is not Array, Chan, Map, Slice, or String
+// MaxLen return an ValidatorFunc that limit max length of value.
+// It panics if value is not Array, Chan, Map, Slice, or String.
 func MaxLen(max int) govalidator.ValidatorFunc {
 	return func(rule *govalidator.Rule, value interface{}, target interface{}) error {
 		v := reflect.Indirect(reflect.ValueOf(value))
