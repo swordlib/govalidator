@@ -5,7 +5,7 @@ import (
 )
 
 // Email return a email ValidatorFunc
-func Email(reserved ...string) govalidator.ValidatorFunc {
+func Email() govalidator.ValidatorFunc {
 	return func(rule *govalidator.Rule, value interface{}, target interface{}) error {
 		return nil
 	}
