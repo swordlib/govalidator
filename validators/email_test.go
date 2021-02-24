@@ -38,7 +38,7 @@ func TestEmail(t *testing.T) {
 			},
 			{
 				Email: "238483",
-				Want:  errors.New("malformed"),
+				Want:  errors.New("invalid email address"),
 			},
 		}
 		for _, tc := range testCases {
