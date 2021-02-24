@@ -9,9 +9,9 @@ import (
 	"github.com/swordlib/govalidator"
 )
 
-// MaxLen return an ValidatorFunc that limit max length of value.
+// MinLen return an ValidatorFunc that limit min length of value.
 // It panics if value is not Array, Chan, Map, Slice, or String.
-func MaxLen(max int) govalidator.ValidatorFunc {
+func MinLen(min int) govalidator.ValidatorFunc {
 	return func(rule *govalidator.Rule, value interface{}, target interface{}) error {
 		v := reflect.Indirect(reflect.ValueOf(value))
 		l := 0
@@ -20,11 +20,11 @@ func MaxLen(max int) govalidator.ValidatorFunc {
 		} else {
 			l = v.Len()
 		}
-		if l > max {
+		if l < min {
 			if rule != nil && rule.Message != "" {
 				return errors.New(rule.Message)
 			}
-			return fmt.Errorf("length(%d) must be less than %d", l, max)
+			return fmt.Errorf("length(%d) must be greater than %d", l, min)
 		}
 		return nil
 	}
