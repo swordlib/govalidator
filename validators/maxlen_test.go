@@ -24,7 +24,12 @@ func TestMaxLen(t *testing.T) {
 			{
 				Value:     "abcd",
 				MaxLength: 2,
-				Want:      errors.New("length should not greater than 2"),
+				Want:      errors.New("length(4) should not greater than 2"),
+			},
+			{
+				Value:     "支持中文",
+				MaxLength: 3,
+				Want:      errors.New("length(4) should not greater than 3"),
 			},
 			{
 				Value:     []int{1, 2, 3, 4},
@@ -34,7 +39,7 @@ func TestMaxLen(t *testing.T) {
 			{
 				Value:     [4]int{1, 2, 3, 4},
 				MaxLength: 3,
-				Want:      errors.New("length should not greater than 3"),
+				Want:      errors.New("length(4) should not greater than 3"),
 			},
 		}
 		for _, tc := range testCases {
